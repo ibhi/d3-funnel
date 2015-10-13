@@ -28,6 +28,7 @@
 						<option value="color">Custom colors</option>
 						<option value="labelsColor">Custom label colors</option>
 						<option value="works">The works</option>
+						<option value="border">Border</option>
 					</select>
 				</form>
 				<!-- Funnel container -->
@@ -192,6 +193,13 @@
 											alert('<' + d.label.raw + '> selected.');
 										},
 									},
+								},
+							},
+						],
+						border: [
+							data.normal, {
+								chart: {
+									showBorder: true
 								},
 							},
 						],

@@ -32,7 +32,11 @@ var D3Funnel = (function () {
 				curve: {
 					enabled: false,
 					height: 20
-				}
+				},
+				showBorder: false,
+				borderColor: '#666666',
+				borderThickness: 4,
+				borderAlpha: 100
 			},
 			block: {
 				dynamicHeight: false,
@@ -151,6 +155,10 @@ var D3Funnel = (function () {
 			this.dynamicHeight = settings.block.dynamicHeight;
 			this.minHeight = settings.block.minHeight;
 			this.animation = settings.chart.animate;
+			this.showBorder = settings.chart.showBorder;
+			this.borderColor = settings.chart.borderColor;
+			this.borderThickness = settings.chart.borderThickness;
+			this.borderAlpha = settings.chart.borderAlpha;
 
 			// Support for events
 			this.onBlockClick = settings.events.click.block;
@@ -337,6 +345,10 @@ var D3Funnel = (function () {
 		value: function _draw() {
 			// Add the SVG
 			this.svg = d3.select(this.selector).append('svg').attr('width', this.width).attr('height', this.height);
+
+			if (this.showBorder) {
+				this._showBorder(this.svg);
+			}
 
 			this.blockPaths = this._makePaths();
 
@@ -821,6 +833,19 @@ var D3Funnel = (function () {
 			}
 
 			return (paths[1][1] + paths[2][1]) / 2;
+		}
+
+		/**
+   * Define the border for svg canvas.
+   *
+   * @param {Object} svg
+   *
+   * @return {void}
+   */
+	}, {
+		key: '_showBorder',
+		value: function _showBorder(svg) {
+			svg.attr('border', 1).append('rect').attr('x', 0).attr('y', 0).attr('height', this.height).attr('width', this.width).style('fill', 'none').style('stroke', this.borderColor).style('stroke-width', this.borderThickness).style('stroke-opacity', this.borderAlpha / 100);
 		}
 	}]);
 
