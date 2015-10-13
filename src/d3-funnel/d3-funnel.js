@@ -19,6 +19,12 @@ class D3Funnel {
 			borderColor: '#666666',
 			borderThickness: 4,
 			borderAlpha: 100,
+			margin: {
+				top: 0,
+				right: 0,
+				bottom: 0,
+				left: 0,
+			},
 		},
 		block: {
 			dynamicHeight: false,
@@ -108,8 +114,6 @@ class D3Funnel {
 		this.colorizer.setScale(settings.block.fill.scale);
 
 		// Initialize funnel chart settings
-		this.width = settings.chart.width;
-		this.height = settings.chart.height;
 		this.bottomWidth = settings.chart.width * settings.chart.bottomWidth;
 		this.bottomPinch = settings.chart.bottomPinch;
 		this.isInverted = settings.chart.inverted;
@@ -124,6 +128,9 @@ class D3Funnel {
 		this.borderColor = settings.chart.borderColor;
 		this.borderThickness = settings.chart.borderThickness;
 		this.borderAlpha = settings.chart.borderAlpha;
+		this.margin = settings.chart.margin;
+		this.width = settings.chart.width - this.margin.left - this.margin.right;
+		this.height = settings.chart.height - this.margin.top - this.margin.bottom;
 
 		// Support for events
 		this.onBlockClick = settings.events.click.block;
@@ -292,12 +299,15 @@ class D3Funnel {
 		// Add the SVG
 		this.svg = d3.select(this.selector)
 			.append('svg')
-			.attr('width', this.width)
-			.attr('height', this.height);
+			.attr('width', this.width + this.margin.left + this.margin.right)
+			.attr('height', this.height + this.margin.top + this.margin.bottom);
 
 		if (this.showBorder) {
 			this._showBorder(this.svg);
 		}
+
+		this.svg = this.svg.append('g')
+			.attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
 
 		this.blockPaths = this._makePaths();
 
@@ -811,8 +821,8 @@ class D3Funnel {
 			.append('rect')
 			.attr('x', 0)
 			.attr('y', 0)
-			.attr('height', this.height)
-			.attr('width', this.width)
+			.attr('height', this.height + this.margin.top + this.margin.bottom)
+			.attr('width', this.width + this.margin.left + this.margin.right)
 			.style('fill', 'none')
 			.style('stroke', this.borderColor)
 			.style('stroke-width', this.borderThickness)

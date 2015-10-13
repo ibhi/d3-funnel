@@ -29,6 +29,7 @@
 						<option value="labelsColor">Custom label colors</option>
 						<option value="works">The works</option>
 						<option value="border">Border</option>
+						<option value="margin">Margin</option>
 					</select>
 				</form>
 				<!-- Funnel container -->
@@ -199,7 +200,20 @@
 						border: [
 							data.normal, {
 								chart: {
-									showBorder: true
+									showBorder: true,
+								},
+							},
+						],
+						margin: [
+							data.normal, {
+								chart: {
+									showBorder: true,
+									margin: {
+										top: 50,
+										right: 40,
+										bottom: 50,
+										left: 40,
+									}
 								},
 							},
 						],
