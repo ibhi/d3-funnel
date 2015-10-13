@@ -42,7 +42,8 @@ var D3Funnel = (function () {
 					right: 0,
 					bottom: 0,
 					left: 0
-				}
+				},
+				bgColor: 'none'
 			},
 			block: {
 				dynamicHeight: false,
@@ -166,6 +167,7 @@ var D3Funnel = (function () {
 			this.margin = settings.chart.margin;
 			this.width = settings.chart.width - this.margin.left - this.margin.right;
 			this.height = settings.chart.height - this.margin.top - this.margin.bottom;
+			this.bgColor = settings.chart.bgColor;
 
 			// Support for events
 			this.onBlockClick = settings.events.click.block;
@@ -353,8 +355,15 @@ var D3Funnel = (function () {
 			// Add the SVG
 			this.svg = d3.select(this.selector).append('svg').attr('width', this.width + this.margin.left + this.margin.right).attr('height', this.height + this.margin.top + this.margin.bottom);
 
-			if (this.showBorder) {
+			if (this.showBorder && this.bgColor !== 'none') {
 				this._showBorder(this.svg);
+			} else {
+				if (this.showBorder) {
+					this._showBorder(this.svg);
+				}
+				if (this.bgColor !== 'none') {
+					this._bgColor(this.svg);
+				}
 			}
 
 			this.svg = this.svg.append('g').attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
@@ -854,7 +863,12 @@ var D3Funnel = (function () {
 	}, {
 		key: '_showBorder',
 		value: function _showBorder(svg) {
-			svg.attr('border', 1).append('rect').attr('x', 0).attr('y', 0).attr('height', this.height + this.margin.top + this.margin.bottom).attr('width', this.width + this.margin.left + this.margin.right).style('fill', 'none').style('stroke', this.borderColor).style('stroke-width', this.borderThickness).style('stroke-opacity', this.borderAlpha / 100);
+			svg.attr('border', 1).append('rect').attr('x', 0).attr('y', 0).attr('height', this.height + this.margin.top + this.margin.bottom).attr('width', this.width + this.margin.left + this.margin.right).style('fill', this.bgColor).style('stroke', this.borderColor).style('stroke-width', this.borderThickness).style('stroke-opacity', this.borderAlpha / 100);
+		}
+	}, {
+		key: '_bgColor',
+		value: function _bgColor(svg) {
+			svg.append('rect').attr('x', 0).attr('y', 0).attr('height', this.height + this.margin.top + this.margin.bottom).attr('width', this.width + this.margin.left + this.margin.right).style('fill', this.bgColor);
 		}
 	}]);
 

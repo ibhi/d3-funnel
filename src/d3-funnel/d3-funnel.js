@@ -25,6 +25,7 @@ class D3Funnel {
 				bottom: 0,
 				left: 0,
 			},
+			bgColor: 'none',
 		},
 		block: {
 			dynamicHeight: false,
@@ -131,6 +132,7 @@ class D3Funnel {
 		this.margin = settings.chart.margin;
 		this.width = settings.chart.width - this.margin.left - this.margin.right;
 		this.height = settings.chart.height - this.margin.top - this.margin.bottom;
+		this.bgColor = settings.chart.bgColor;
 
 		// Support for events
 		this.onBlockClick = settings.events.click.block;
@@ -302,8 +304,15 @@ class D3Funnel {
 			.attr('width', this.width + this.margin.left + this.margin.right)
 			.attr('height', this.height + this.margin.top + this.margin.bottom);
 
-		if (this.showBorder) {
+		if (this.showBorder && this.bgColor !== 'none') {
 			this._showBorder(this.svg);
+		}else {
+			if (this.showBorder) {
+				this._showBorder(this.svg);
+			}
+			if (this.bgColor !== 'none') {
+				this._bgColor(this.svg);
+			}
 		}
 
 		this.svg = this.svg.append('g')
@@ -823,10 +832,18 @@ class D3Funnel {
 			.attr('y', 0)
 			.attr('height', this.height + this.margin.top + this.margin.bottom)
 			.attr('width', this.width + this.margin.left + this.margin.right)
-			.style('fill', 'none')
+			.style('fill', this.bgColor)
 			.style('stroke', this.borderColor)
 			.style('stroke-width', this.borderThickness)
 			.style('stroke-opacity', (this.borderAlpha / 100));
 	}
 
+	_bgColor(svg) {
+		svg.append('rect')
+			.attr('x', 0)
+			.attr('y', 0)
+			.attr('height', this.height + this.margin.top + this.margin.bottom)
+			.attr('width', this.width + this.margin.left + this.margin.right)
+			.style('fill', this.bgColor);
+	}
 }
