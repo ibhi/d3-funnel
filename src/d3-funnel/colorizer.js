@@ -108,4 +108,33 @@ class Colorizer {
 		return hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
 	}
 
+	_validateColors(colorsList) {
+		if (Array.isArray(colorsList) === false || colorsList.length === 0 ) {
+			throw new Error('Atleast specify one color.');
+		}
+
+		colorsList.forEach((color) => {
+			if (! this.hexExpression.test(color)) {
+				throw new Error('Invalid color format.');
+			}
+		});
+	}
+
+	linearGradientGenerator(svg, colorsList, alphaList, ratioList) {
+		this._validateColors(colorsList);
+
+		let gradient = svg.append('defs')
+							.append('linearGradient')
+								.attr('id', 'gradient')
+								.attr('x1', '0%')
+								.attr('x2', '0%')
+								.attr('y1', '0%')
+								.attr('y2', '100%');
+		colorsList.forEach(function colorLoop(color, index) {
+			gradient.append('stop')
+					.attr('offset', ratioList[index] + '%')
+					.attr('stop-color', color)
+					.attr('stop-opacity', alphaList[index] / 100.0);
+		});
+	}
 }

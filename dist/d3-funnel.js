@@ -34,7 +34,7 @@ var D3Funnel = (function () {
 					height: 20
 				},
 				showBorder: false,
-				borderColor: '#666666',
+				borderColor: '#000000',
 				borderThickness: 4,
 				borderAlpha: 100,
 				margin: {
@@ -43,7 +43,9 @@ var D3Funnel = (function () {
 					bottom: 0,
 					left: 0
 				},
-				bgColor: 'none'
+				bgColor: 'none',
+				bgRatio: '100',
+				bgAlpha: '100'
 			},
 			block: {
 				dynamicHeight: false,
@@ -167,7 +169,9 @@ var D3Funnel = (function () {
 			this.margin = settings.chart.margin;
 			this.width = settings.chart.width - this.margin.left - this.margin.right;
 			this.height = settings.chart.height - this.margin.top - this.margin.bottom;
-			this.bgColor = settings.chart.bgColor;
+			this.bgColor = settings.chart.bgColor.split(',');
+			this.bgRatio = settings.chart.bgRatio.split(',');
+			this.bgAlpha = settings.chart.bgAlpha.split(',');
 
 			// Support for events
 			this.onBlockClick = settings.events.click.block;
@@ -355,15 +359,12 @@ var D3Funnel = (function () {
 			// Add the SVG
 			this.svg = d3.select(this.selector).append('svg').attr('width', this.width + this.margin.left + this.margin.right).attr('height', this.height + this.margin.top + this.margin.bottom);
 
-			if (this.showBorder && this.bgColor !== 'none') {
+			if (this.showBorder) {
 				this._showBorder(this.svg);
-			} else {
-				if (this.showBorder) {
-					this._showBorder(this.svg);
-				}
-				if (this.bgColor !== 'none') {
-					this._bgColor(this.svg);
-				}
+			}
+
+			if (this.bgColor[0]) {
+				this._showBackground(this.svg);
 			}
 
 			this.svg = this.svg.append('g').attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
@@ -863,12 +864,17 @@ var D3Funnel = (function () {
 	}, {
 		key: '_showBorder',
 		value: function _showBorder(svg) {
-			svg.attr('border', 1).append('rect').attr('x', 0).attr('y', 0).attr('height', this.height + this.margin.top + this.margin.bottom).attr('width', this.width + this.margin.left + this.margin.right).style('fill', this.bgColor).style('stroke', this.borderColor).style('stroke-width', this.borderThickness).style('stroke-opacity', this.borderAlpha / 100);
+			svg.attr('border', 1).append('rect').attr('x', 0).attr('y', 0).attr('height', this.height + this.margin.top + this.margin.bottom).attr('width', this.width + this.margin.left + this.margin.right).style('fill', 'none').style('stroke', this.borderColor).style('stroke-width', this.borderThickness).style('stroke-opacity', this.borderAlpha / 100.0);
 		}
 	}, {
-		key: '_bgColor',
-		value: function _bgColor(svg) {
-			svg.append('rect').attr('x', 0).attr('y', 0).attr('height', this.height + this.margin.top + this.margin.bottom).attr('width', this.width + this.margin.left + this.margin.right).style('fill', this.bgColor);
+		key: '_showBackground',
+		value: function _showBackground(svg) {
+			if (this.bgColor.length === 1) {
+				svg.append('rect').attr('x', this.borderThickness / 2).attr('y', this.borderThickness / 2).attr('height', this.height + this.margin.top + this.margin.bottom - this.borderThickness).attr('width', this.width + this.margin.left + this.margin.right - this.borderThickness).style('fill', this.bgColor[0]);
+				return;
+			}
+			this.colorizer.linearGradientGenerator(svg, this.bgColor, this.bgAlpha, this.bgRatio);
+			svg.append('rect').attr('x', this.borderThickness / 2).attr('y', this.borderThickness / 2).attr('height', this.height + this.margin.top + this.margin.bottom - this.borderThickness).attr('width', this.width + this.margin.left + this.margin.right - this.borderThickness).style('fill', 'url(#gradient)');
 		}
 	}]);
 
@@ -960,6 +966,31 @@ var Colorizer = (function () {
    *
    * @return {string}
    */
+	}, {
+		key: '_validateColors',
+		value: function _validateColors(colorsList) {
+			var _this5 = this;
+
+			if (Array.isArray(colorsList) === false || colorsList.length === 0) {
+				throw new Error('Atleast specify one color.');
+			}
+
+			colorsList.forEach(function (color) {
+				if (!_this5.hexExpression.test(color)) {
+					throw new Error('Invalid color format.');
+				}
+			});
+		}
+	}, {
+		key: 'linearGradientGenerator',
+		value: function linearGradientGenerator(svg, colorsList, alphaList, ratioList) {
+			this._validateColors(colorsList);
+
+			var gradient = svg.append('defs').append('linearGradient').attr('id', 'gradient').attr('x1', '0%').attr('x2', '0%').attr('y1', '0%').attr('y2', '100%');
+			colorsList.forEach(function colorLoop(color, index) {
+				gradient.append('stop').attr('offset', ratioList[index] + '%').attr('stop-color', color).attr('stop-opacity', alphaList[index] / 100.0);
+			});
+		}
 	}], [{
 		key: 'shade',
 		value: function shade(color, _shade) {

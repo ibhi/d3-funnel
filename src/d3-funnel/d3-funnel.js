@@ -16,7 +16,7 @@ class D3Funnel {
 				height: 20,
 			},
 			showBorder: false,
-			borderColor: '#666666',
+			borderColor: '#000000',
 			borderThickness: 4,
 			borderAlpha: 100,
 			margin: {
@@ -26,6 +26,8 @@ class D3Funnel {
 				left: 0,
 			},
 			bgColor: 'none',
+			bgRatio: '100',
+			bgAlpha: '100',
 		},
 		block: {
 			dynamicHeight: false,
@@ -132,7 +134,9 @@ class D3Funnel {
 		this.margin = settings.chart.margin;
 		this.width = settings.chart.width - this.margin.left - this.margin.right;
 		this.height = settings.chart.height - this.margin.top - this.margin.bottom;
-		this.bgColor = settings.chart.bgColor;
+		this.bgColor = settings.chart.bgColor.split(',');
+		this.bgRatio = settings.chart.bgRatio.split(',');
+		this.bgAlpha = settings.chart.bgAlpha.split(',');
 
 		// Support for events
 		this.onBlockClick = settings.events.click.block;
@@ -304,19 +308,16 @@ class D3Funnel {
 			.attr('width', this.width + this.margin.left + this.margin.right)
 			.attr('height', this.height + this.margin.top + this.margin.bottom);
 
-		if (this.showBorder && this.bgColor !== 'none') {
+		if (this.showBorder) {
 			this._showBorder(this.svg);
-		}else {
-			if (this.showBorder) {
-				this._showBorder(this.svg);
-			}
-			if (this.bgColor !== 'none') {
-				this._bgColor(this.svg);
-			}
+		}
+
+		if (this.bgColor[0]) {
+			this._showBackground(this.svg);
 		}
 
 		this.svg = this.svg.append('g')
-			.attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
+							.attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
 
 		this.blockPaths = this._makePaths();
 
@@ -832,18 +833,28 @@ class D3Funnel {
 			.attr('y', 0)
 			.attr('height', this.height + this.margin.top + this.margin.bottom)
 			.attr('width', this.width + this.margin.left + this.margin.right)
-			.style('fill', this.bgColor)
+			.style('fill', 'none')
 			.style('stroke', this.borderColor)
 			.style('stroke-width', this.borderThickness)
-			.style('stroke-opacity', (this.borderAlpha / 100));
+			.style('stroke-opacity', (this.borderAlpha / 100.0));
 	}
 
-	_bgColor(svg) {
+	_showBackground(svg) {
+		if (this.bgColor.length === 1) {
+			svg.append('rect')
+				.attr('x', this.borderThickness / 2)
+				.attr('y', this.borderThickness / 2)
+				.attr('height', (this.height + this.margin.top + this.margin.bottom) - this.borderThickness)
+				.attr('width', (this.width + this.margin.left + this.margin.right) - this.borderThickness )
+				.style('fill', this.bgColor[0]);
+				return;
+		}
+		this.colorizer.linearGradientGenerator(svg, this.bgColor, this.bgAlpha, this.bgRatio);
 		svg.append('rect')
-			.attr('x', 0)
-			.attr('y', 0)
-			.attr('height', this.height + this.margin.top + this.margin.bottom)
-			.attr('width', this.width + this.margin.left + this.margin.right)
-			.style('fill', this.bgColor);
+			.attr('x', this.borderThickness / 2)
+			.attr('y', this.borderThickness / 2)
+			.attr('height', (this.height + this.margin.top + this.margin.bottom) - this.borderThickness)
+			.attr('width', (this.width + this.margin.left + this.margin.right) - this.borderThickness )
+			.style('fill', 'url(#gradient)');
 	}
 }
